@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏛️ Kairos · Pantheon Status</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&family=JetBrains+Mono:wght@300;400;500&display=swap');
+        :root {
+            --void: #080a0f; --deep: #0b0e16; --surface: #1a1c28; --border: #2a2c3a;
+            --gold: #c8943a; --mist: #8a8899; --pale: #d4d0e0;
+            --live: #4ade80; --ready: #f0c060; --offline: #f87171; --building: #6a8898;
+            --hermes: #d4b84a; --aphrodite: #b05870; --ares: #c0382a; --apollo: #d4a850;
+            --demeter: #7a6a40; --hephaestus: #c07040; --poseidon: #3a7090;
+            --artemis: #5a8050; --athena: #6a8898; --dionysus: #8a4080; --zeus: #9a8ac0;
+            --hades: #3a2040; --persephone: #b0d0a0;
+            --font-display: 'Cinzel', serif; --font-body: 'Crimson Pro', serif; --font-mono: 'JetBrains Mono', monospace;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--void); color: var(--pale); font-family: var(--font-body); min-height: 100vh; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+
+        .header { text-align: center; margin-bottom: 2rem; }
+        .header h1 { font-family: var(--font-display); font-size: 2.2rem; color: var(--gold); letter-spacing: 4px; }
+        .header-sub { font-family: var(--font-mono); font-size: 0.5rem; color: var(--mist); letter-spacing: 2px; }
+
+        .spiral-section { margin-bottom: 2rem; }
+        .spiral-title { font-family: var(--font-display); font-size: 1rem; letter-spacing: 3px; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+        .spiral-title .badge { font-size: 0.5rem; padding: 0.15rem 0.5rem; border-radius: 3px; }
+        .badge-celer { background: rgba(212,168,80,0.15); color: var(--apollo); }
+        .badge-tardus { background: rgba(106,136,152,0.15); color: var(--athena); }
+
+        .god-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.6rem; }
+        .god-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; transition: all 0.3s; position: relative; overflow: hidden; }
+        .god-card:hover { transform: translateY(-2px); }
+        .god-card.live { border-left: 3px solid var(--live); }
+        .god-card.ready { border-left: 3px solid var(--ready); }
+        .god-card.offline { border-left: 3px solid var(--offline); opacity: 0.6; }
+        .god-card.building { border-left: 3px solid var(--building); }
+
+        .god-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .god-name { font-family: var(--font-display); font-size: 0.85rem; letter-spacing: 2px; }
+        .god-number { font-family: var(--font-mono); font-size: 0.5rem; color: var(--mist); }
+        .god-timing { font-family: var(--font-mono); font-size: 0.5rem; color: var(--gold); }
+
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .dot-live { background: var(--live); box-shadow: 0 0 6px rgba(74,222,128,0.5); }
+        .dot-ready { background: var(--ready); }
+        .dot-offline { background: var(--offline); }
+        .dot-building { background: var(--building); }
+
+        .god-role { font-family: var(--font-body); font-size: 0.7rem; font-style: italic; color: var(--mist); margin-bottom: 0.5rem; }
+        .god-meta { font-family: var(--font-mono); font-size: 0.45rem; color: var(--mist); display: flex; gap: 1rem; flex-wrap: wrap; }
+        .god-meta span { color: var(--pale); }
+        .god-edge { font-family: var(--font-mono); font-size: 0.42rem; color: var(--mist); margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px solid var(--border); }
+
+        .legend { display: flex; gap: 1.5rem; justify-content: center; margin-bottom: 2rem; font-family: var(--font-mono); font-size: 0.5rem; color: var(--mist); flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 0.3rem; }
+
+        .refresh-bar { text-align: center; margin-top: 1.5rem; font-family: var(--font-mono); font-size: 0.45rem; color: var(--mist); }
+        button { font-family: var(--font-mono); font-size: 0.5rem; padding: 0.3rem 0.7rem; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--pale); }
+        button:hover { background: var(--gold); color: var(--void); }
+
+        @media (max-width: 768px) { .god-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>🏛️ KAIROS PANTHEON</h1>
+        <div class="header-sub">SPIRALUS CELER (φ) + SPIRALUS TARDUS (π) · LIVE SYSTEM STATUS</div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><span class="status-dot dot-live"></span> Live (Edge + HTML)</div>
+        <div class="legend-item"><span class="status-dot dot-ready"></span> Edge Ready (needs HTML)</div>
+        <div class="legend-item"><span class="status-dot dot-building"></span> Building</div>
+        <div class="legend-item"><span class="status-dot dot-offline"></span> Offline</div>
+    </div>
+
+    <!-- SPIRALUS CELER -->
+    <div class="spiral-section">
+        <div class="spiral-title">
+            ⚡ SPIRALUS CELER <span class="badge badge-celer">φ SPIRAL · FAST</span>
+        </div>
+        <div class="god-grid" id="celerGrid"></div>
+    </div>
+
+    <!-- SPIRALUS TARDUS -->
+    <div class="spiral-section">
+        <div class="spiral-title">
+            🦉 SPIRALUS TARDUS <span class="badge badge-tardus">π SPIRAL · SLOW</span>
+        </div>
+        <div class="god-grid" id="tardusGrid"></div>
+    </div>
+
+    <div class="refresh-bar">
+        <button onclick="checkAll()">🔄 Refresh Status</button>
+        <span style="margin-left:1rem;" id="lastCheck">Checking...</span>
+    </div>
+
+</div>
+
+<script type="module">
+const EDGE_BASE = 'https://kzcucjcyxybypncbdbws.supabase.co/functions/v1';
+const KAIROS_URL = 'https://kzcucjcyxybypncbdbws.supabase.co';
+const KAIROS_KEY = 'sb_publishable_saeUHGocDah-T2_709M6Fg_g26JtLXw';
+const sb = window.supabase.createClient(KAIROS_URL, KAIROS_KEY);
+
+const GODS = [
+    // CELER
+    { id: 'hermes',     name: 'Hermes',     icon: '⚡', color: '#d4b84a', spiral: 'celer',  pos: 1, timing: 'φ¹ = 1.618s',  edge: 'hermes-extract',      role: 'Token Hunter · Semantic extraction from raw text',                       status: 'checking', html: true },
+    { id: 'aphrodite',  name: 'Aphrodite',  icon: '💗', color: '#b05870', spiral: 'celer',  pos: 2, timing: 'φ² = 2.618s',  edge: 'aphrodite-compose',   role: 'Desire Composer · Couples tokens into prompt pairs',                  status: 'checking', html: false },
+    { id: 'ares',       name: 'Ares',       icon: '⚔️', color: '#c0382a', spiral: 'celer',  pos: 3, timing: 'φ³ = 4.236s',  edge: 'ares-transform',      role: 'Verb Selector · Applies force to resolve token tension',              status: 'checking', html: false },
+    { id: 'demeter',    name: 'Demeter',    icon: '🌾', color: '#7a6a40', spiral: 'celer',  pos: 4, timing: 'φ⁴ = 6.854s',  edge: 'demeter-cultivate',   role: 'Variant Farmer · Cultivates prompts, tends variant garden',          status: 'checking', html: true },
+    { id: 'hephaestus', name: 'Hephaestus', icon: '🔨', color: '#c07040', spiral: 'celer',  pos: 5, timing: 'φ⁵ = 11.09s',  edge: 'hephaestus-forge',    role: 'Image Forge · Generates images via Pollinations.ai',                 status: 'checking', html: true },
+    { id: 'poseidon',   name: 'Poseidon',   icon: '🌊', color: '#3a7090', spiral: 'celer',  pos: 6, timing: 'φ⁶ = 17.94s',  edge: 'poseidon-flow',       role: 'CSS Flow · Extracts palettes, generates style blocks',              status: 'checking', html: true },
+    { id: 'apollo',     name: 'Apollo',     icon: '☀️', color: '#d4a850', spiral: 'celer',  pos: 7, timing: 'φ⁷ = 29.03s',  edge: 'apollo-synthesize',   role: 'Loop Orchestrator · Synthesizes all outputs, Ouroboros critic',      status: 'checking', html: true },
+    // TARDUS
+    { id: 'artemis',    name: 'Artemis',    icon: '🏹', color: '#5a8050', spiral: 'tardus', pos: 8,  timing: 'π¹ = 3.14s',   edge: null,                  role: 'Code Hunter · Hunts repos for HTML patterns',                         status: 'building', html: false },
+    { id: 'athena',     name: 'Athena',     icon: '🦉', color: '#6a8898', spiral: 'tardus', pos: 9,  timing: 'π² = 9.87s',   edge: 'athena-audit',        role: 'Workshop · Monaco editor, block composer, sandbox',                  status: 'checking', html: true },
+    { id: 'dionysus',   name: 'Dionysus',   icon: '🍇', color: '#8a4080', spiral: 'tardus', pos: 10, timing: 'π³ = 31.0s',   edge: null,                  role: 'Vibe Check · Aesthetic judgment, mood validation',                    status: 'building', html: false },
+    { id: 'zeus',       name: 'Zeus',       icon: '🌩️', color: '#9a8ac0', spiral: 'tardus', pos: 11, timing: 'π⁴ = 97.4s',   edge: null,                  role: 'Governance · Deploy or reject, binding decisions',                   status: 'building', html: false },
+    { id: 'hades',      name: 'Hades',      icon: '🏚️', color: '#3a2040', spiral: 'tardus', pos: 12, timing: 'π⁵ = 306s',    edge: null,                  role: 'Purge · Deletes what failed, clears the field',                      status: 'building', html: false },
+    { id: 'persephone', name: 'Persephone', icon: '🌱', color: '#b0d0a0', spiral: 'tardus', pos: 13, timing: 'π⁶ = 961s',    edge: null,                  role: 'Kernel · Plants seed for next Celer cycle',                           status: 'building', html: false }
+];
+
+async function checkEdge(god) {
+    if (!god.edge) return 'building';
+    try {
+        const res = await fetch(`${EDGE_BASE}/${god.edge}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'status' })
+        });
+        if (res.ok) return 'live';
+        return 'ready';
+    } catch {
+        return 'offline';
+    }
+}
+
+async function checkHTML(god) {
+    if (!god.html) return false;
+    try {
+        const res = await fetch(`https://kairos-coder.github.io/${god.id}/`);
+        return res.ok;
+    } catch {
+        return false;
+    }
+}
+
+function getStatus(god, edgeStatus, htmlLive) {
+    if (!god.edge && !htmlLive) return 'building';
+    if (edgeStatus === 'live' && htmlLive) return 'live';
+    if (edgeStatus === 'live' && !htmlLive) return 'ready';
+    if (edgeStatus === 'ready') return 'ready';
+    return 'offline';
+}
+
+function renderGodCard(god, status) {
+    const statusLabel = { live: 'LIVE', ready: 'EDGE READY', building: 'BUILDING', offline: 'OFFLINE' };
+    const statusClass = { live: 'live', ready: 'ready', building: 'building', offline: 'offline' };
+    const dotClass = { live: 'dot-live', ready: 'dot-ready', building: 'dot-building', offline: 'dot-offline' };
+    
+    return `
+        <div class="god-card ${statusClass[status]}">
+            <div class="god-header">
+                <span class="god-name" style="color:${god.color}">${god.icon} ${god.name.toUpperCase()}</span>
+                <span class="status-dot ${dotClass[status]}" title="${statusLabel[status]}"></span>
+            </div>
+            <div class="god-number">Spiralus ${god.spiral === 'celer' ? 'Celer' : 'Tardus'} #${god.pos} · ${god.timing}</div>
+            <div class="god-role">${god.role}</div>
+            <div class="god-meta">
+                ${god.edge ? `<div>Edge: <span>${god.edge}</span></div>` : '<div>Edge: <span>not yet built</span></div>'}
+                <div>HTML: <span>${god.html ? 'kairos-coder.github.io/'+god.id : 'not yet deployed'}</span></div>
+                <div>Status: <span style="color:var(--${status === 'live' ? 'live' : status === 'ready' ? 'ready' : status === 'building' ? 'building' : 'offline'})">${statusLabel[status]}</span></div>
+            </div>
+            <div class="god-edge">
+                ${god.spiral === 'celer' ? 'CELER φ' : 'TARDUS π'} · 
+                ${god.edge ? `Receives from: ${god.id === 'hermes' ? 'Persephone (telos seed)' : GODS[GODS.findIndex(g => g.id === god.id) - 1]?.name || 'upstream'}` : 'Architecture defined · Edge Function pending'}
+            </div>
+        </div>
+    `;
+}
+
+async function checkAll() {
+    const results = [];
+    
+    for (const god of GODS) {
+        const edgeStatus = await checkEdge(god);
+        const htmlLive = await checkHTML(god);
+        const status = getStatus(god, edgeStatus, htmlLive);
+        results.push({ god, status });
+    }
+    
+    // Render
+    document.getElementById('celerGrid').innerHTML = results
+        .filter(r => r.god.spiral === 'celer')
+        .map(r => renderGodCard(r.god, r.status))
+        .join('');
+    
+    document.getElementById('tardusGrid').innerHTML = results
+        .filter(r => r.god.spiral === 'tardus')
+        .map(r => renderGodCard(r.god, r.status))
+        .join('');
+    
+    // Stats
+    const live = results.filter(r => r.status === 'live').length;
+    const ready = results.filter(r => r.status === 'ready').length;
+    const building = results.filter(r => r.status === 'building').length;
+    
+    document.getElementById('lastCheck').textContent = 
+        `Updated ${new Date().toLocaleTimeString()} · ${live} live · ${ready} edge-ready · ${building} building`;
+}
+
+checkAll();
+setInterval(checkAll, 60000); // Refresh every minute
+</script>
+</body>
+</html>
