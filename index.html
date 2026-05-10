@@ -1,232 +1,676 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏛️ Kairos · Olympian Engine</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&family=JetBrains+Mono:wght@300;400;500&display=swap');
-        :root {
-            --void: #080a0f; --deep: #0b0e16; --surface: #1a1c28; --border: #2a2c3a;
-            --gold: #c8943a; --mist: #8a8899; --pale: #d4d0e0;
-            --live: #4ade80; --ready: #f0c060; --offline: #f87171; --building: #6a8898;
-            --hermes: #d4b84a; --aphrodite: #b05870; --ares: #c0382a; --apollo: #d4a850;
-            --demeter: #7a6a40; --hephaestus: #c07040; --poseidon: #3a7090;
-            --artemis: #5a8050; --athena: #6a8898; --dionysus: #8a4080; --zeus: #9a8ac0;
-            --hades: #3a2040; --persephone: #b0d0a0;
-            --font-display: 'Cinzel', serif; --font-body: 'Crimson Pro', serif; --font-mono: 'JetBrains Mono', monospace;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--void); color: var(--pale); font-family: var(--font-body); }
-        .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>KAIROS · Microcosm</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --panel: #12121a;
+    --text: #c8c8d4;
+    --muted: #6b6b7b;
+    --gold: #d4a853;
+    --hermes: #f0a500;
+    --aphrodite: #e8647c;
+    --apollo: #e8c840;
+    --demeter: #6b9e4a;
+    --poseidon: #4a8b9e;
+    --hera: #9b6b9e;
+    --terminal: #0d0d14;
+    --border: #1e1e2a;
+    --radius: 12px;
+    --touch: 48px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier New', monospace;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
 
-        /* ═══ HERO ═══ */
-        .hero { text-align: center; padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
-        .hero h1 { font-family: var(--font-display); font-size: 3rem; color: var(--gold); letter-spacing: 6px; }
-        .hero h1 em { font-style: normal; color: var(--pale); font-size: 0.5em; display: block; letter-spacing: 10px; }
-        .hero-tagline { font-family: var(--font-body); font-size: 1rem; font-style: italic; color: var(--mist); margin-top: 1rem; line-height: 1.6; max-width: 600px; margin-left: auto; margin-right: auto; }
-        .hero-rule { width: 60px; height: 1px; background: var(--gold); margin: 1.5rem auto; }
+  /* Ouroboros Swipe */
+  .ouroboros {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    height: 100dvh;
+    width: 100vw;
+  }
+  .ouroboros::-webkit-scrollbar { display:none; }
 
-        /* ═══ WHAT IS THIS ═══ */
-        .section { margin-bottom: 2.5rem; }
-        .section-title { font-family: var(--font-display); font-size: 1.1rem; color: var(--gold); letter-spacing: 3px; margin-bottom: 1rem; text-align: center; }
-        .section-body { font-family: var(--font-body); font-size: 0.9rem; line-height: 1.7; color: var(--pale); max-width: 700px; margin: 0 auto; text-align: center; }
+  .god-panel {
+    flex: 0 0 100vw;
+    scroll-snap-align: center;
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    border-right: 1px solid var(--border);
+    background: var(--panel);
+    position: relative;
+    overflow-y: auto;
+  }
 
-        /* ═══ SPIRALS EXPLAINED ═══ */
-        .spiral-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
-        .spiral-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; text-align: center; }
-        .spiral-card.celer { border-top: 3px solid var(--apollo); }
-        .spiral-card.tardus { border-top: 3px solid var(--athena); }
-        .spiral-card h3 { font-family: var(--font-display); font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 0.5rem; }
-        .spiral-card .constant { font-family: var(--font-mono); font-size: 0.55rem; color: var(--gold); margin-bottom: 0.5rem; }
-        .spiral-card p { font-family: var(--font-body); font-size: 0.75rem; color: var(--mist); line-height: 1.5; }
+  /* Telos Header */
+  .telos-bar {
+    background: #000;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 14px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    text-align: center;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .telos-dot {
+    width: 7px; height: 7px;
+    background: #4f4; border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-        /* ═══ GOD GRID ═══ */
-        .god-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.6rem; margin-bottom: 2rem; }
-        .god-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
-        .god-card.live { border-left: 3px solid var(--live); }
-        .god-card.ready { border-left: 3px solid var(--ready); }
-        .god-card.offline { border-left: 3px solid var(--offline); opacity: 0.6; }
-        .god-card.building { border-left: 3px solid var(--building); }
-        .god-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
-        .god-name { font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 2px; }
-        .god-timing { font-family: var(--font-mono); font-size: 0.5rem; color: var(--gold); }
-        .god-role { font-family: var(--font-body); font-size: 0.7rem; font-style: italic; color: var(--mist); }
-        .god-meta { font-family: var(--font-mono); font-size: 0.45rem; color: var(--mist); margin-top: 0.4rem; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        .dot-live { background: var(--live); } .dot-ready { background: var(--ready); }
-        .dot-offline { background: var(--offline); } .dot-building { background: var(--building); }
+  /* Terminal */
+  .terminal {
+    background: var(--terminal);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 12px;
+    font-size: 0.65rem;
+    color: var(--muted);
+    max-height: 120px;
+    overflow-y: auto;
+    flex-shrink: 0;
+    line-height: 1.5;
+  }
+  .terminal .line { opacity:0.7; }
+  .terminal .line.latest { color: #aaf; opacity:1; }
 
-        /* ═══ ENTRY POINTS ═══ */
-        .entry-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; margin-bottom: 2rem; }
-        .entry-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center; text-decoration: none; color: var(--pale); transition: all 0.2s; }
-        .entry-card:hover { border-color: var(--gold); transform: translateY(-2px); }
-        .entry-icon { font-size: 1.5rem; margin-bottom: 0.3rem; }
-        .entry-name { font-family: var(--font-display); font-size: 0.7rem; letter-spacing: 2px; }
-        .entry-desc { font-family: var(--font-mono); font-size: 0.45rem; color: var(--mist); margin-top: 0.3rem; }
+  /* Buttons */
+  .god-buttons {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    flex-shrink: 0;
+  }
+  .god-btn {
+    flex: 1;
+    min-height: var(--touch);
+    border: 1px solid var(--border);
+    background: #181825;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.8rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .god-btn:active {
+    background: #252535;
+    border-color: var(--gold);
+    transform: scale(0.97);
+  }
+  .god-btn.primary {
+    background: #1a1a2e;
+    border-color: var(--gold);
+    color: var(--gold);
+    font-weight: bold;
+  }
 
-        .legend { display: flex; gap: 1.5rem; justify-content: center; margin-bottom: 1rem; font-family: var(--font-mono); font-size: 0.5rem; color: var(--mist); }
-        .legend-item { display: flex; align-items: center; gap: 0.3rem; }
-        button { font-family: var(--font-mono); font-size: 0.5rem; padding: 0.3rem 0.7rem; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--pale); }
-        button:hover { background: var(--gold); color: var(--void); }
-        .refresh-bar { text-align: center; margin-top: 1rem; font-family: var(--font-mono); font-size: 0.45rem; color: var(--mist); }
+  /* Queue */
+  .queue {
+    flex-shrink: 0;
+    padding: 0 12px;
+  }
+  .queue-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 6px 0 4px;
+  }
+  .queue-item {
+    background: #14141e;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 4px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .queue-item .icon { font-size:1rem; }
+  .queue-item .text { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .queue-item .status {
+    font-size:0.6rem;
+    padding:2px 6px;
+    border-radius:4px;
+    background:#1a1a28;
+  }
+  .queue-item .status.ready { color:#4f4; }
+  .queue-item .status.processing { color:#fa0; animation:pulse 1s infinite; }
 
-        @media (max-width: 768px) { 
-            .spiral-cards, .entry-grid { grid-template-columns: 1fr; }
-            .god-grid { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 2rem; }
-        }
-    </style>
+  /* Output */
+  .output-area {
+    flex: 1;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+  }
+  .output-placeholder {
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-align: center;
+    opacity: 0.6;
+  }
+  .output-img {
+    max-width: 100%;
+    max-height: 50vh;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .palette-grid {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .palette-swatch {
+    width: 48px; height: 48px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    position: relative;
+  }
+  .palette-swatch .hex {
+    position: absolute;
+    bottom: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.5rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* Nav hint */
+  .nav-hint {
+    position: fixed;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.55rem;
+    color: var(--muted);
+    z-index: 20;
+    pointer-events: none;
+    opacity: 0.5;
+    display: flex;
+    gap: 20px;
+  }
+  .nav-hint span { opacity:0.5; }
+  .nav-hint span.active { opacity:1; color: var(--gold); }
+
+  /* God-specific accent borders */
+  .god-panel[data-god="hermes"] .terminal .line.latest { color: var(--hermes); }
+  .god-panel[data-god="aphrodite"] .terminal .line.latest { color: var(--aphrodite); }
+  .god-panel[data-god="apollo"] .terminal .line.latest { color: var(--apollo); }
+  .god-panel[data-god="demeter"] .terminal .line.latest { color: var(--demeter); }
+  .god-panel[data-god="poseidon"] .terminal .line.latest { color: var(--poseidon); }
+  .god-panel[data-god="hera"] .terminal .line.latest { color: var(--hera); }
+
+  .god-panel[data-god="hermes"] .god-btn.primary { border-color: var(--hermes); color: var(--hermes); }
+  .god-panel[data-god="aphrodite"] .god-btn.primary { border-color: var(--aphrodite); color: var(--aphrodite); }
+  .god-panel[data-god="apollo"] .god-btn.primary { border-color: var(--apollo); color: var(--apollo); }
+  .god-panel[data-god="demeter"] .god-btn.primary { border-color: var(--demeter); color: var(--demeter); }
+  .god-panel[data-god="poseidon"] .god-btn.primary { border-color: var(--poseidon); color: var(--poseidon); }
+  .god-panel[data-god="hera"] .god-btn.primary { border-color: var(--hera); color: var(--hera); }
+</style>
 </head>
 <body>
-<div class="container">
 
-    <!-- ═══ HERO ═══ -->
-    <div class="hero">
-        <h1>KAIROS<em>OLYMPIAN ENGINE</em></h1>
-        <div class="hero-rule"></div>
-        <div class="hero-tagline">
-            A generative system where 12 gods and their Chthonic shadows<br>
-            produce prompts, images, and self-evolving HTML temples.<br>
-            Not a content generator — a simulated cognitive architecture<br>
-            that produces content as a byproduct.
-        </div>
-    </div>
+<div class="ouroboros" id="ouroboros">
 
-    <!-- ═══ THE TWO SPIRALS ═══ -->
-    <div class="section">
-        <div class="section-title">THE DUAL SPIRAL</div>
-        <div class="spiral-cards">
-            <div class="spiral-card celer">
-                <h3 style="color:var(--apollo)">⚡ SPIRALUS CELER</h3>
-                <div class="constant">φ SPIRAL · GOLDEN RATIO · FAST</div>
-                <p>Seven gods run in sequence at φ-weighted intervals. Hermes hunts tokens in 1.6s. Apollo synthesizes in 29s. The full cycle completes in 73 seconds — generating prompts, images, and CSS blocks ready for temple deployment.</p>
-            </div>
-            <div class="spiral-card tardus">
-                <h3 style="color:var(--athena)">🦉 SPIRALUS TARDUS</h3>
-                <div class="constant">π SPIRAL · REFLECTIVE · SLOW</div>
-                <p>Six gods run at π-weighted intervals. Artemis hunts code in 3s. Persephone holds the seed for 16 minutes. The Tardus spiral judges what Celer produced — composing temples, vibe-checking, deploying or purging.</p>
-            </div>
-        </div>
-        <div class="section-body" style="font-size:0.8rem;">
-            <strong>The time dimension emerges from the gap between them.</strong><br>
-            Celer builds. Tardus reflects. Persephone plants the seed for the next cycle.
-        </div>
+  <!-- ⚡ HERMES -->
+  <section class="god-panel" data-god="hermes" id="hermes">
+    <div class="telos-bar">⚡ HERMES · <span id="hermes-telos">No active telos</span><span class="telos-dot"></span></div>
+    <div class="terminal" id="hermes-terminal"><div class="line">⚡ Hermes awaits the hunt...</div></div>
+    <div class="god-buttons">
+      <button class="god-btn" onclick="hermesHunt()">🔍 Hunt Tokens</button>
+      <button class="god-btn primary" onclick="hermesClassify()">🏷️ Classify</button>
     </div>
+    <div class="queue"><div class="queue-label">📦 Token Queue</div><div id="hermes-queue"></div></div>
+    <div class="output-area" id="hermes-output"><div class="output-placeholder">Tokens appear here</div></div>
+  </section>
 
-    <!-- ═══ ENTRY POINTS ═══ -->
-    <div class="section">
-        <div class="section-title">HUMAN ENTRY POINTS</div>
-        <div class="entry-grid">
-            <a href="https://kairos-coder.github.io/hermes" class="entry-card" style="border-color:var(--hermes)">
-                <div class="entry-icon">⚡</div>
-                <div class="entry-name" style="color:var(--hermes)">HERMES</div>
-                <div class="entry-desc">Set telos · Hunt tokens</div>
-            </a>
-            <a href="https://kairos-coder.github.io/apollo" class="entry-card" style="border-color:var(--apollo)">
-                <div class="entry-icon">☀️</div>
-                <div class="entry-name" style="color:var(--apollo)">APOLLO</div>
-                <div class="entry-desc">Orchestrate loop · Dashboard</div>
-            </a>
-            <a href="https://kairos-coder.github.io/athena" class="entry-card" style="border-color:var(--athena)">
-                <div class="entry-icon">🦉</div>
-                <div class="entry-name" style="color:var(--athena)">ATHENA</div>
-                <div class="entry-desc">Monaco editor · Block composer</div>
-            </a>
-            <a href="https://kairos-coder.github.io/persephone" class="entry-card" style="border-color:var(--persephone)">
-                <div class="entry-icon">🌱</div>
-                <div class="entry-name" style="color:var(--persephone)">PERSEPHONE</div>
-                <div class="entry-desc">Command center · Send telos</div>
-            </a>
-        </div>
+  <!-- 💗 APHRODITE -->
+  <section class="god-panel" data-god="aphrodite" id="aphrodite">
+    <div class="telos-bar">💗 APHRODITE · <span id="aphrodite-telos">No active telos</span><span class="telos-dot"></span></div>
+    <div class="terminal" id="aphrodite-terminal"><div class="line">💗 Aphrodite awaits the binding...</div></div>
+    <div class="god-buttons">
+      <button class="god-btn" onclick="aphroditePair()">💞 Form Pairs</button>
+      <button class="god-btn primary" onclick="aphroditeCounter()">⚔️ Counter-Domain</button>
     </div>
+    <div class="queue"><div class="queue-label">💞 Pair Queue</div><div id="aphrodite-queue"></div></div>
+    <div class="output-area" id="aphrodite-output"><div class="output-placeholder">Pairs appear here</div></div>
+  </section>
 
-    <!-- ═══ LIVE SYSTEM STATUS ═══ -->
-    <div class="section">
-        <div class="section-title">LIVE SYSTEM STATUS</div>
-        <div class="legend">
-            <div class="legend-item"><span class="status-dot dot-live"></span> Live</div>
-            <div class="legend-item"><span class="status-dot dot-ready"></span> Edge Ready</div>
-            <div class="legend-item"><span class="status-dot dot-building"></span> Building</div>
-            <div class="legend-item"><span class="status-dot dot-offline"></span> Offline</div>
-        </div>
-        <div class="god-grid" id="allGods"></div>
-        <div class="refresh-bar">
-            <button onclick="checkAll()">🔄 Refresh</button>
-            <span id="lastCheck" style="margin-left:1rem;">Checking...</span>
-        </div>
+  <!-- ☀️ APOLLO -->
+  <section class="god-panel" data-god="apollo" id="apollo">
+    <div class="telos-bar">☀️ APOLLO · <span id="apollo-telos">No active telos</span><span class="telos-dot"></span></div>
+    <div class="terminal" id="apollo-terminal"><div class="line">☀️ Apollo awaits the vision...</div></div>
+    <div class="god-buttons">
+      <button class="god-btn" onclick="apolloSVO()">📐 SVO Triplets</button>
+      <button class="god-btn primary" onclick="apolloPrompt()">✨ Generate Prompt</button>
     </div>
+    <div class="queue"><div class="queue-label">📐 SVO Queue</div><div id="apollo-queue"></div></div>
+    <div class="output-area" id="apollo-output"><div class="output-placeholder">Prompts appear here</div></div>
+  </section>
+
+  <!-- 🌾 DEMETER -->
+  <section class="god-panel" data-god="demeter" id="demeter">
+    <div class="telos-bar">🌾 DEMETER · <span id="demeter-telos">No active telos</span><span class="telos-dot"></span></div>
+    <div class="terminal" id="demeter-terminal"><div class="line">🌾 Demeter awaits the seed...</div></div>
+    <div class="god-buttons">
+      <button class="god-btn" onclick="demeterGarden()">🌱 Garden Prompt</button>
+      <button class="god-btn primary" onclick="demeterPollinate()">🌸 Pollinate</button>
+    </div>
+    <div class="queue"><div class="queue-label">🌱 Seed Queue</div><div id="demeter-queue"></div></div>
+    <div class="output-area" id="demeter-output"><div class="output-placeholder">Images bloom here</div></div>
+  </section>
+
+  <!-- 🌊 POSEIDON -->
+  <section class="god-panel" data-god="poseidon" id="poseidon">
+    <div class="telos-bar">🌊 POSEIDON · <span id="poseidon-telos">No active telos</span><span class="telos-dot"></span></div>
+    <div class="terminal" id="poseidon-terminal"><div class="line">🌊 Poseidon awaits the tide...</div></div>
+    <div class="god-buttons">
+      <button class="god-btn" onclick="poseidonPalette()">🎨 Extract Palette</button>
+      <button class="god-btn primary" onclick="poseidonTokenize()">🔤 Re-Tokenize</button>
+    </div>
+    <div class="queue"><div class="queue-label">🌊 Image Queue</div><div id="poseidon-queue"></div></div>
+    <div class="output-area" id="poseidon-output"><div class="output-placeholder">Palettes & tokens appear here</div></div>
+  </section>
+
+  <!-- 👑 HERA -->
+  <section class="god-panel" data-god="hera" id="hera">
+    <div class="telos-bar">👑 HERA · <span id="hera-telos">No active telos</span><span class="telos-dot"></span></div>
+    <div class="terminal" id="hera-terminal"><div class="line">👑 Hera presides. The system is in order.</div></div>
+    <div class="god-buttons">
+      <button class="god-btn" onclick="heraSetTelos()">🎯 Set Telos</button>
+      <button class="god-btn primary" onclick="heraLineage()">🕯️ View Lineage</button>
+    </div>
+    <div class="queue"><div class="queue-label">👑 Command Queue</div><div id="hera-queue"></div></div>
+    <div class="output-area" id="hera-output"><div class="output-placeholder">Telos lineage appears here</div></div>
+  </section>
 
 </div>
 
-<script type="module">
-const EDGE_BASE = 'https://kzcucjcyxybypncbdbws.supabase.co/functions/v1';
+<div class="nav-hint" id="nav-hint">
+  <span>◀</span> SWIPE <span>▶</span>
+</div>
 
-const GODS = [
-    { id: 'hermes',     name: 'Hermes',     icon: '⚡', color: '#d4b84a', spiral: 'CELER',  pos: 1,  timing: 'φ¹ = 1.618s',  edge: 'hermes-extract',      role: 'Token Hunter',                          html: true },
-    { id: 'aphrodite',  name: 'Aphrodite',  icon: '💗', color: '#b05870', spiral: 'CELER',  pos: 2,  timing: 'φ² = 2.618s',  edge: 'aphrodite-compose',   role: 'Desire Composer',                       html: false },
-    { id: 'ares',       name: 'Ares',       icon: '⚔️', color: '#c0382a', spiral: 'CELER',  pos: 3,  timing: 'φ³ = 4.236s',  edge: 'ares-transform',      role: 'Verb Selector',                         html: false },
-    { id: 'demeter',    name: 'Demeter',    icon: '🌾', color: '#7a6a40', spiral: 'CELER',  pos: 4,  timing: 'φ⁴ = 6.854s',  edge: 'demeter-cultivate',   role: 'Variant Farmer',                        html: true },
-    { id: 'hephaestus', name: 'Hephaestus', icon: '🔨', color: '#c07040', spiral: 'CELER',  pos: 5,  timing: 'φ⁵ = 11.09s',  edge: 'hephaestus-forge',    role: 'Image Forge',                           html: true },
-    { id: 'poseidon',   name: 'Poseidon',   icon: '🌊', color: '#3a7090', spiral: 'CELER',  pos: 6,  timing: 'φ⁶ = 17.94s',  edge: 'poseidon-flow',       role: 'CSS Flow · Palette Extractor',           html: true },
-    { id: 'apollo',     name: 'Apollo',     icon: '☀️', color: '#d4a850', spiral: 'CELER',  pos: 7,  timing: 'φ⁷ = 29.03s',  edge: 'apollo-synthesize',   role: 'Loop Orchestrator · Synthesizer',        html: true },
-    { id: 'artemis',    name: 'Artemis',    icon: '🏹', color: '#5a8050', spiral: 'TARDUS', pos: 8,  timing: 'π¹ = 3.14s',   edge: null,                  role: 'Code Hunter',                           html: false },
-    { id: 'athena',     name: 'Athena',     icon: '🦉', color: '#6a8898', spiral: 'TARDUS', pos: 9,  timing: 'π² = 9.87s',   edge: 'athena-audit',        role: 'Workshop · Block Composer',              html: true },
-    { id: 'dionysus',   name: 'Dionysus',   icon: '🍇', color: '#8a4080', spiral: 'TARDUS', pos: 10, timing: 'π³ = 31.0s',   edge: null,                  role: 'Vibe Check · Aesthetic Judge',           html: false },
-    { id: 'zeus',       name: 'Zeus',       icon: '🌩️', color: '#9a8ac0', spiral: 'TARDUS', pos: 11, timing: 'π⁴ = 97.4s',   edge: null,                  role: 'Governance · Deploy/Reject',             html: false },
-    { id: 'hades',      name: 'Hades',      icon: '🏚️', color: '#3a2040', spiral: 'TARDUS', pos: 12, timing: 'π⁵ = 306s',    edge: null,                  role: 'Purge · Clear the Field',               html: false },
-    { id: 'persephone', name: 'Persephone', icon: '🌱', color: '#b0d0a0', spiral: 'TARDUS', pos: 13, timing: 'π⁶ = 961s',    edge: null,                  role: 'Kernel · Plant Seed for Next Cycle',     html: true }
-];
+<script>
+// ============================================================
+// KAIROS STATE
+// ============================================================
+const Kairos = {
+  activeTelos: null,
+  telosLineage: [],
+  gods: {
+    hermes:   { queue: [], output: [], terminal: ['⚡ Hermes awaits the hunt...'] },
+    aphrodite: { queue: [], output: [], terminal: ['💗 Aphrodite awaits the binding...'] },
+    apollo:   { queue: [], output: [], terminal: ['☀️ Apollo awaits the vision...'] },
+    demeter:  { queue: [], output: [], terminal: ['🌾 Demeter awaits the seed...'] },
+    poseidon: { queue: [], output: [], terminal: ['🌊 Poseidon awaits the tide...'] },
+    hera:     { queue: [], output: [], terminal: ['👑 Hera presides. The system is in order.'] }
+  }
+};
 
-async function checkEdge(god) {
-    if (!god.edge) return null;
-    try {
-        const res = await fetch(`${EDGE_BASE}/${god.edge}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'status' }) });
-        return res.ok ? 'live' : 'ready';
-    } catch { return 'offline'; }
+// ============================================================
+// HELPERS
+// ============================================================
+function log(god, msg) {
+  Kairos.gods[god].terminal.push(msg);
+  renderTerminal(god);
 }
 
-async function checkHTML(god) {
-    if (!god.html) return false;
-    try { const res = await fetch(`https://kairos-coder.github.io/${god.id}/`); return res.ok; } catch { return false; }
+function enqueue(god, item) {
+  Kairos.gods[god].queue.push({ ...item, status: 'ready' });
+  renderQueue(god);
 }
 
-async function checkAll() {
-    for (const god of GODS) {
-        const edgeStatus = await checkEdge(god);
-        const htmlLive = await checkHTML(god);
-        if (!god.edge && !htmlLive) god._status = 'building';
-        else if (edgeStatus === 'live' && htmlLive) god._status = 'live';
-        else if (edgeStatus === 'live') god._status = 'ready';
-        else god._status = 'offline';
+function dequeue(god) {
+  if (Kairos.gods[god].queue.length === 0) return null;
+  Kairos.gods[god].queue[0].status = 'processing';
+  renderQueue(god);
+  const item = Kairos.gods[god].queue.shift();
+  return item;
+}
+
+function setOutput(god, html) {
+  document.getElementById(god + '-output').innerHTML = html;
+}
+
+function renderTerminal(god) {
+  const t = Kairos.gods[god].terminal;
+  const el = document.getElementById(god + '-terminal');
+  el.innerHTML = t.map((line, i) => 
+    `<div class="line${i === t.length - 1 ? ' latest' : ''}">${line}</div>`
+  ).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function renderQueue(god) {
+  const q = Kairos.gods[god].queue;
+  const el = document.getElementById(god + '-queue');
+  if (q.length === 0) {
+    el.innerHTML = '<div class="queue-item"><span class="text" style="color:var(--muted)">— Empty —</span></div>';
+    return;
+  }
+  el.innerHTML = q.map((item, i) => `
+    <div class="queue-item">
+      <span class="icon">${item.icon || '📦'}</span>
+      <span class="text">${item.label || item.id || 'Item ' + (i+1)}</span>
+      <span class="status ${item.status}">${item.status}</span>
+    </div>
+  `).join('');
+}
+
+function updateAllTelos() {
+  const display = Kairos.activeTelos || 'No active telos';
+  ['hermes','aphrodite','apollo','demeter','poseidon','hera'].forEach(g => {
+    document.getElementById(g + '-telos').textContent = display;
+  });
+}
+
+// ============================================================
+// HERMES · Token Hunter
+// ============================================================
+function hermesHunt() {
+  log('hermes', '⚡ Hunting tokens from URL & text...');
+  const sampleTokens = [
+    { word: 'shadow', domain: 'wild' },
+    { word: 'flame', domain: 'forge' },
+    { word: 'threshold', domain: 'tide' },
+    { word: 'binding', domain: 'crown' },
+    { word: 'whisper', domain: 'vox' }
+  ];
+  sampleTokens.forEach(t => {
+    enqueue('hermes', { icon: '⚡', label: t.word, domain: t.domain });
+  });
+  log('hermes', `⚡ Queued ${sampleTokens.length} tokens for classification.`);
+}
+
+function hermesClassify() {
+  const item = dequeue('hermes');
+  if (!item) { log('hermes', '⚠️ No tokens in queue.'); return; }
+  log('hermes', `🏷️ Classifying: "${item.label}" → domain: ${item.domain}`);
+  Kairos.gods.hermes.output.push(item);
+  setOutput('hermes', Kairos.gods.hermes.output.map(t => 
+    `<span style="display:inline-block;margin:4px;padding:4px 8px;background:#1a1a28;border-radius:6px;font-size:0.7rem;">⚡ ${t.label} <span style="color:var(--muted)">${t.domain}</span></span>`
+  ).join(''));
+  
+  // Push to Aphrodite
+  enqueue('aphrodite', { icon: '💗', label: item.label, domain: item.domain });
+  log('aphrodite', `💗 Received token: "${item.label}" from Hermes.`);
+}
+
+// ============================================================
+// APHRODITE · Semantic Binding
+// ============================================================
+function aphroditePair() {
+  if (Kairos.gods.aphrodite.queue.length < 2) {
+    log('aphrodite', '⚠️ Need at least 2 tokens for pairing.');
+    return;
+  }
+  const a = dequeue('aphrodite');
+  const b = dequeue('aphrodite');
+  const pair = { a: a.label, b: b.label, resonance: Math.random().toFixed(2) };
+  log('aphrodite', `💞 Bound: "${pair.a}" + "${pair.b}" (resonance: ${pair.resonance})`);
+  Kairos.gods.aphrodite.output.push(pair);
+  setOutput('aphrodite', Kairos.gods.aphrodite.output.map(p => 
+    `<div style="padding:6px;margin:4px;background:#1a1a28;border-radius:6px;font-size:0.7rem;">💞 ${p.a} ↔ ${p.b} <span style="color:var(--muted)">${p.resonance}</span></div>`
+  ).join(''));
+  
+  // Push to Apollo
+  enqueue('apollo', { icon: '☀️', label: `${pair.a} + ${pair.b}`, pair });
+  log('apollo', `☀️ Received pair: "${pair.a} ↔ ${pair.b}" from Aphrodite.`);
+}
+
+function aphroditeCounter() {
+  log('aphrodite', '⚔️ Scanning for counter-domain pairs...');
+  log('aphrodite', '⚔️ No counter-domains detected in current queue.');
+}
+
+// ============================================================
+// APOLLO · SVO Synthesis & Prompt Generation
+// ============================================================
+function apolloSVO() {
+  const item = dequeue('apollo');
+  if (!item) { log('apollo', '⚠️ No pairs in queue.'); return; }
+  const svo = {
+    subject: item.pair.a,
+    verb: 'transforms',
+    object: item.pair.b
+  };
+  log('apollo', `📐 SVO: ${svo.subject} → ${svo.verb} → ${svo.object}`);
+  Kairos.gods.apollo.output.push(svo);
+  setOutput('apollo', Kairos.gods.apollo.output.map(s => 
+    `<div style="padding:6px;margin:4px;background:#1a1a28;border-radius:6px;font-size:0.7rem;">📐 <b>${s.subject}</b> ${s.verb} <b>${s.object}</b></div>`
+  ).join(''));
+  
+  // Push to Demeter as seed
+  enqueue('demeter', { icon: '🌱', label: `${svo.subject} ${svo.verb} ${svo.object}`, svo });
+  log('demeter', `🌱 Received seed: "${svo.subject} ${svo.verb} ${svo.object}" from Apollo.`);
+}
+
+function apolloPrompt() {
+  if (Kairos.gods.apollo.output.length === 0) {
+    log('apollo', '⚠️ No SVO triplets to synthesize. Run SVO first.');
+    return;
+  }
+  const last = Kairos.gods.apollo.output[Kairos.gods.apollo.output.length - 1];
+  const prompt = `${last.subject} ${last.verb} ${last.object}, ethereal, dark fantasy, gothic atmosphere`;
+  log('apollo', `✨ Prompt: "${prompt}"`);
+  setOutput('apollo', `<div style="padding:10px;background:#1a1a20;border:1px solid var(--apollo);border-radius:8px;font-size:0.75rem;">✨ ${prompt}</div>`);
+  
+  // Push to Demeter
+  enqueue('demeter', { icon: '🌱', label: prompt, prompt });
+  log('demeter', `🌱 Received prompt from Apollo.`);
+}
+
+// ============================================================
+// DEMETER · Image Compression (Prompt → Image)
+// ============================================================
+function demeterGarden() {
+  log('demeter', '🌱 Gardening queued seeds into fertile prompts...');
+  Kairos.gods.demeter.queue.forEach(item => {
+    item.gardened = true;
+    item.label = '🌿 ' + item.label;
+  });
+  renderQueue('demeter');
+  log('demeter', `🌱 ${Kairos.gods.demeter.queue.length} seeds gardened.`);
+}
+
+async function demeterPollinate() {
+  const item = dequeue('demeter');
+  if (!item) { log('demeter', '⚠️ No seeds in queue.'); return; }
+  log('demeter', '🌸 Pollinating via Pollinations...');
+  
+  const prompt = item.prompt || item.label || 'dark fantasy threshold shadow flame';
+  const encoded = encodeURIComponent(prompt);
+  const imageUrl = `https://image.pollinations.ai/prompt/${encoded}?width=512&height=512&nologo=true`;
+  
+  log('demeter', `🌸 Image blooming: ${imageUrl.substring(0,60)}...`);
+  
+  const outputHtml = `
+    <div style="text-align:center;">
+      <img src="${imageUrl}" alt="${prompt}" class="output-img" 
+           onload="log('demeter','🌸 Image fully bloomed.'); 
+                  enqueue('poseidon',{icon:'🌊',label:'Compressed image',imageUrl:'${imageUrl}',prompt:'${prompt.replace(/'/g,"\\'")}'}); 
+                  log('poseidon','🌊 Received image from Demeter.');"
+           onerror="log('demeter','⚠️ Image failed to load. Pollinations may be slow.');">
+      <div style="font-size:0.6rem;color:var(--muted);margin-top:6px;">${prompt.substring(0,80)}</div>
+    </div>`;
+  setOutput('demeter', outputHtml);
+}
+
+// ============================================================
+// POSEIDON · Image Decompression (Palette + Tokens)
+// ============================================================
+function poseidonPalette() {
+  log('poseidon', '🎨 Extracting palette via Color Thief (simulated)...');
+  const palette = [
+    '#1a0a0a', '#3d1c1c', '#6b2a2a', '#a04040', '#d4a0a0'
+  ];
+  Kairos.gods.poseidon.output.push({ type: 'palette', colors: palette });
+  
+  const paletteHtml = '<div class="palette-grid">' + palette.map(c => 
+    `<div class="palette-swatch" style="background:${c};"><span class="hex">${c}</span></div>`
+  ).join('') + '</div>';
+  setOutput('poseidon', paletteHtml);
+  log('poseidon', `🎨 Palette extracted: ${palette.length} colors.`);
+  
+  // Push CSS template
+  const template = {
+    name: 'poseidon-template',
+    palette,
+    css: `body{background:${palette[0]};color:${palette[4]};}`
+  };
+  Kairos.gods.poseidon.output.push({ type: 'template', template });
+  log('poseidon', '📐 CSS template built from palette.');
+}
+
+function poseidonTokenize() {
+  log('poseidon', '🔤 Re-tokenizing image via Tesseract.js (simulated)...');
+  const tokens = ['shadow', 'flame', 'threshold', 'binding', 'whisper'];
+  tokens.forEach(t => {
+    Kairos.gods.poseidon.output.push({ type: 'token', word: t });
+  });
+  
+  const tokenHtml = tokens.map(t => 
+    `<span style="display:inline-block;margin:4px;padding:4px 8px;background:#1a1a28;border-radius:6px;font-size:0.7rem;">🔤 ${t}</span>`
+  ).join('');
+  setOutput('poseidon', tokenHtml);
+  log('poseidon', `🔤 Extracted ${tokens.length} tokens. Routing to Hermes...`);
+  
+  // Close the loop — send back to Hermes
+  tokens.forEach(t => {
+    enqueue('hermes', { icon: '⚡', label: t, domain: 'unknown' });
+  });
+  log('hermes', `⚡ Received ${tokens.length} re-tokenized tokens from Poseidon. Ouroboros turns.`);
+}
+
+// ============================================================
+// HERA · Command Center
+// ============================================================
+function heraSetTelos() {
+  const telos = prompt('🎯 Enter the active telos:', Kairos.activeTelos || '');
+  if (!telos) return;
+  Kairos.activeTelos = telos;
+  Kairos.telosLineage.push({ telos, timestamp: new Date().toISOString() });
+  updateAllTelos();
+  log('hera', `🎯 Telos set: "${telos}"`);
+  log('hera', '📡 Broadcasting to all gods...');
+  ['hermes','aphrodite','apollo','demeter','poseidon'].forEach(g => {
+    log(g, `📡 Telos received: "${telos}"`);
+  });
+  enqueue('hera', { icon: '🎯', label: telos, status: 'active' });
+  renderQueue('hera');
+}
+
+function heraLineage() {
+  if (Kairos.telosLineage.length === 0) {
+    log('hera', '🕯️ No previous teloi in lineage.');
+    setOutput('hera', '<div class="output-placeholder">No lineage yet. Set a telos first.</div>');
+    return;
+  }
+  log('hera', `🕯️ Displaying ${Kairos.telosLineage.length} teloi in lineage.`);
+  const lineageHtml = Kairos.telosLineage.map((t, i) => 
+    `<div style="padding:6px;margin:4px;background:#1a1a28;border-radius:6px;font-size:0.7rem;">🕯️ ${i+1}. ${t.telos} <span style="color:var(--muted)">${new Date(t.timestamp).toLocaleTimeString()}</span></div>`
+  ).join('');
+  setOutput('hera', lineageHtml);
+}
+
+// ============================================================
+// SWIPE DETECTION & NAVIGATION
+// ============================================================
+let currentGodIndex = 0;
+const godOrder = ['hermes','aphrodite','apollo','demeter','poseidon','hera'];
+const ouroboros = document.getElementById('ouroboros');
+
+ouroboros.addEventListener('scroll', () => {
+  const index = Math.round(ouroboros.scrollLeft / window.innerWidth);
+  if (index !== currentGodIndex && index >= 0 && index < godOrder.length) {
+    currentGodIndex = index;
+    updateNavHint();
+  }
+});
+
+function updateNavHint() {
+  const dots = godOrder.map((g, i) => 
+    `<span class="${i === currentGodIndex ? 'active' : ''}">${g[0].toUpperCase()}</span>`
+  ).join(' · ');
+  document.getElementById('nav-hint').innerHTML = dots;
+}
+
+// Swipe to god by name
+function swipeTo(godName) {
+  const index = godOrder.indexOf(godName);
+  if (index >= 0) {
+    ouroboros.scrollTo({ left: index * window.innerWidth, behavior: 'smooth' });
+    currentGodIndex = index;
+    updateNavHint();
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  updateAllTelos();
+  updateNavHint();
+  // Load CDN scripts dynamically if needed
+  log('hera', '👑 Kairos Microcosm initialized. The pantheon stands.');
+  log('hera', '📱 Swipe to navigate between gods.');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+
+// Keyboard shortcuts for desktop testing
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') {
+    e.preventDefault();
+    if (currentGodIndex < godOrder.length - 1) {
+      swipeTo(godOrder[currentGodIndex + 1]);
     }
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    if (currentGodIndex > 0) {
+      swipeTo(godOrder[currentGodIndex - 1]);
+    }
+  }
+});
 
-    document.getElementById('allGods').innerHTML = GODS.map(g => {
-        const label = { live: 'LIVE', ready: 'EDGE READY', building: 'BUILDING', offline: 'OFFLINE' };
-        return `
-            <div class="god-card ${g._status}">
-                <div class="god-header">
-                    <span class="god-name" style="color:${g.color}">${g.icon} ${g.name}</span>
-                    <span class="status-dot dot-${g._status}"></span>
-                </div>
-                <div class="god-timing">Spiralus ${g.spiral} #${g.pos} · ${g.timing}</div>
-                <div class="god-role">${g.role}</div>
-                <div class="god-meta">
-                    ${g.edge ? `Edge: ${g.edge}` : 'Edge: pending'} · 
-                    HTML: ${g.html ? 'deployed' : 'pending'} · 
-                    ${label[g._status]}
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    const live = GODS.filter(g => g._status === 'live').length;
-    document.getElementById('lastCheck').textContent = `Updated ${new Date().toLocaleTimeString()} · ${live}/13 live`;
-}
-
-checkAll();
-setInterval(checkAll, 60000);
+console.log('⚡🐍 KAIROS MICROCOSM · Ouroboros Online 🐍⚡');
+console.log('Swipe to navigate. Gods await your command.');
 </script>
 </body>
 </html>
